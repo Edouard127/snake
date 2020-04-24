@@ -18,6 +18,8 @@ const int start_size = 5;
 int x = serpentcorps[0].x;
 int y = serpentcorps[0].y;
 int dir;
+int c = 0;
+int r = 0;
 int serpentSize = start_size;
 int serpentX = (Cell_Size*Grid_Size)/2, serpentY = (Cell_Size*Grid_Size)/2;
 int random(int min, int max){
@@ -39,21 +41,20 @@ SDL_Rect placeApple(int x, int y){
 
     SDL_Rect carre;
     carre = drawSquare(renderer, x, y, Cell_Size, 255, 0, 0);
+    drawSquare(renderer, c, r, Cell_Size, 0, 0, 255);
     return carre;
 }
 
 
-void moveSerpent(SDL_Event q, int g, int d, int h, int b){
-    if(q.key.keysym.sym == SDLK_w)
-        g -= 1;
-    else if(q.key.keysym.sym == SDLK_a)
-        d -= 1;
-    else if(q.key.keysym.sym == SDLK_s)
-        h += 1;
-    else if(q.key.keysym.sym == SDLK_d)
-        b += 1;
-  }
+
 clock_t avantClock = 0;
+void drawCell(int colonne, int range){
+
+    c = colonne*Cell_Size;
+    r = range*Cell_Size;
+
+    drawSquare(renderer, c, r, Cell_Size, 0, 0, 255);
+}
 //main
 int main()
 {
@@ -69,57 +70,66 @@ int main()
         while(SDL_PollEvent(&q))
         {
             if(q.type == SDL_KEYDOWN)
-              {
+            {
                 if(q.key.keysym.sym == SDLK_ESCAPE)
                     loop = 0;
                 else if(q.key.keysym.sym == SDLK_w){
-
+                    dir = 0;
                 }
                 else if(q.key.keysym.sym == SDLK_a){
-
+                    dir = 1;
                 }
                 else if(q.key.keysym.sym == SDLK_s){
-
+                    dir = 2;
                 }
                 else if(q.key.keysym.sym == SDLK_d){
-
+                    dir = 3;
                 }
-              }
+            }
             else if(q.type == SDL_QUIT)
             {
-            loop = 0;
+                loop = 0;
             }
-         if(serpentX == (appleX*Cell_Size) && serpentY == (appleY*Cell_Size)){
-             eatApple = true;
-             if(eatApple == true)
-                 appleX = random(0, Grid_Size-1);
-                 appleY = random(0, Grid_Size-1);
-           }
+
         }
+
         clock_t nowClock = clock();
         clock_t ecouleClock = nowClock - avantClock;
         float tempssecond = float(ecouleClock) / float(CLOCKS_PER_SEC);
-        if(tempssecond >= 1){
-            if(q.key.keysym.sym == SDLK_w){
-            serpentY-= Cell_Size;
+        if(tempssecond >= 0.4){
+            if(dir == 0){
+                serpentY-= Cell_Size;
             }
-            if(q.key.keysym.sym == SDLK_a){
-            serpentX-= Cell_Size;
+            else if(dir == 1){
+                serpentX-= Cell_Size;
             }
-            if(q.key.keysym.sym == SDLK_s){
-            serpentY+= Cell_Size;
+            else if(dir == 2){
+                serpentY+= Cell_Size;
             }
-            if(q.key.keysym.sym == SDLK_d){
-            serpentX+= Cell_Size;
+            else if(dir == 3){
+                serpentX+= Cell_Size;
             }
             avantClock = nowClock;
+        }
+        if(serpentX == (appleX*Cell_Size) && serpentY == (appleY*Cell_Size)){
+            drawSquare(renderer, c, r, Cell_Size, 0, 0, 255);
+            c = serpentX;
+            r = serpentY;
+
+            appleX = random(0, Grid_Size-1);
+            appleY = random(0, Grid_Size-1);
+
+
+        }
+        if(((serpentX < -16+1 or serpentY > 256-1)|| serpentY < -16+1 or serpentX > 256-1)){
+            loop = 0;
         }
         SDL_SetRenderDrawColor(renderer, 0, 0 ,0, 255);
         SDL_RenderClear(renderer);
         //pomme
         placeApple(appleX*Cell_Size, appleY*Cell_Size);
         //serpent
-        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+
         serpentcorps[0].x = serpentX;
         serpentcorps[0].y = serpentY;
         serpentcorps[0].w = Cell_Size;
@@ -129,3 +139,4 @@ int main()
     }
     return EXIT_SUCCESS;
 }
+
